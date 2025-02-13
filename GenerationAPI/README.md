@@ -27,3 +27,4 @@ python app.py
 ```
 
 server will run on http://127.0.0.1:3003
+The first time calling the api will take longer than normal as the model needs to first be downloaded
