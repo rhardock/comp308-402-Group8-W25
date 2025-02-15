@@ -26,13 +26,6 @@ const Sidebar = () => {
             </button>
           </Link>
         </li>
-        <li>
-          <Link href="/dashboard/logout">
-            <button className="w-full p-2 bg-red-500 text-white rounded hover:bg-red-600">
-              Logout
-            </button>
-          </Link>
-        </li>
       </ul>
     </div>
   );

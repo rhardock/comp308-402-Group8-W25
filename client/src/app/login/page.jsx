@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { authApi } from '@/services/api';
+import { useUser } from '@/context/UserContext';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +17,8 @@ export default function LoginPage() {
     password: '',
   });
 
+  const { loginUser } = useUser();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -24,6 +27,10 @@ export default function LoginPage() {
     try {
       const response = await authApi.login(formData.email, formData.password);
       localStorage.setItem('token', response.token);
+
+      // loginUser({ name: response.name, email: response.email });
+      loginUser({ email: response.user.email });
+      
       router.push('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'An error occurred');
