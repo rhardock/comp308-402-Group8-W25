@@ -4,7 +4,13 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 
-dotenv.config();
+if (process.env.NODE_ENV === 'development') {
+  console.log('Using local environment variables');
+  dotenv.config({ path: '.env.local' });
+}
+else {
+  dotenv.config();
+}
 
 // Initialize express app
 const app = express();
