@@ -7,8 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 if (process.env.NODE_ENV === 'development') {
   console.log('Using local environment variables');
   dotenv.config({ path: '.env.local' });
-}
-else {
+} else {
   dotenv.config();
 }
 
@@ -26,10 +25,11 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
-
+app.use('/uploads', express.static('uploads'));
 // Auth routes
 app.use('/api/auth', authRoutes);
-
+//upload routes
+app.use('/api', require('./routes/upload'));
 const PORT = process.env.PORT || 5600;
 
 app.listen(PORT, () => {
