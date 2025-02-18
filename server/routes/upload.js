@@ -4,7 +4,12 @@ const path = require('path');
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
 const axios = require('axios');
+
 const router = express.Router();
+
+const FLASK_API_URL = 'http://localhost:5000/summarize';
+
+
 
 // Configure Multer (File Upload Middleware)
 const storage = multer.diskStorage({
@@ -14,6 +19,8 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage });
+
+
 
 // Upload Route
 router.post('/upload', upload.single('pdf'), async (req, res) => {
@@ -28,14 +35,14 @@ router.post('/upload', upload.single('pdf'), async (req, res) => {
         const pdfData = await pdfParse(dataBuffer);
         const response = await axios.post(FLASK_API_URL, { text: pdfData.text });
 
-        return res.json({
+         res.json({
             success: true,
             filePath: `/uploads/${req.file.filename}`,
             summary: response.data.summary
         });
 
     } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
+         res.status(500).json({ success: false, error: error.message });
     }
 });
 
