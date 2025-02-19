@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { uploadPdf } from './pdf-upload-action';
+import { uploadPdf, generateSummary, fetchSummaries } from '@/services/api';
 
 export default function PdfUploader() {
     const [file, setFile] = useState(null);
@@ -11,6 +11,8 @@ export default function PdfUploader() {
     const [status, setStatus] = useState(null);
     const [summary, setSummary] = useState('');
     const [isUploading, setIsUploading] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false); // ✅ Fixed casing
+    const [extractedText, setExtractedText] = useState(''); // ✅ Set to an empty string instead of false
 
     const handleFileChange = useCallback((e) => {
         const selectedFile = e.target.files?.[0];
@@ -23,7 +25,10 @@ export default function PdfUploader() {
         }
 
         setFile(selectedFile);
+        setFileUrl(URL.createObjectURL(selectedFile)); // Temporary local preview URL
+        setExtractedText(''); // Clear extracted text from previous uploads
         setStatus(null);
+        
     }, []);
 
     const handleSubmit = async (e) => {
@@ -43,14 +48,40 @@ export default function PdfUploader() {
             if (result.success) {
                 setStatus({ message: '✅ PDF processed successfully!', type: 'success' });
                 setFileUrl(`http://localhost:5600${result.filePath}`);
-                setSummary(result.summary);
+                setExtractedText(result.extractedText); // ✅ Store extracted text
             } else {
                 setStatus({ message: result.error || 'Upload failed', type: 'error' });
+                setFile(null); // ✅ Reset file on failure
             }
         } catch (error) {
             setStatus({ message: '⚠️ An unexpected error occurred', type: 'error' });
+            setFile(null); // ✅ Reset file on failure
         } finally {
             setIsUploading(false);
+        }
+    };
+
+    const handleGenerateSummary = async () => {
+        if (!extractedText) {
+            setStatus({ message: 'No extracted text available to summarize.', type: 'error' });
+            return;
+        }
+
+        setIsGenerating(true);
+        setStatus({ message: 'Generating summary...', type: 'loading' });
+
+        try {
+            const summaryResult = await generateSummary(extractedText);
+            if (summaryResult.success) {
+                setSummary(summaryResult.summary);
+                setStatus({ message: '✅ Summary generated successfully!', type: 'success' });
+            } else {
+                setStatus({ message: summaryResult.error || 'Summary generation failed', type: 'error' });
+            }
+        } catch (error) {
+            setStatus({ message: '⚠️ Error generating summary', type: 'error' });
+        } finally {
+            setIsGenerating(false);
         }
     };
 
@@ -58,7 +89,7 @@ export default function PdfUploader() {
         <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
             <form onSubmit={handleSubmit} className="space-y-4">
                 <label className="block text-gray-700 font-medium">Upload a PDF</label>
-                
+
                 <Input 
                     type="file" 
                     accept=".pdf"
@@ -66,7 +97,7 @@ export default function PdfUploader() {
                     className="w-full"
                     disabled={isUploading}
                 />
-                
+
                 <Button 
                     type="submit" 
                     className="w-full flex items-center justify-center"
@@ -84,12 +115,29 @@ export default function PdfUploader() {
                     </div>
                 )}
 
-                {fileUrl && (
-                    <div className="mt-4">
-                        <h3 className="text-lg font-semibold">Uploaded PDF:</h3>
-                        <a href={fileUrl} target="_blank" className="text-blue-500 underline">View PDF</a>
-                    </div>
-                )}
+{fileUrl && (
+    <div className="mt-4 text-center">
+        <h3 className="text-lg font-semibold">Uploaded PDF:</h3>
+        <button 
+            onClick={() => window.open(fileUrl, '_blank')}
+            className="px-4 py-2 mt-2 border border-blue-500 bg-blue-500 text-white cursor-pointer text-lg rounded-md hover:bg-blue-600"
+        >
+            View PDF
+        </button>
+    </div>
+)}
+
+{file && (
+    <div className="flex justify-center mt-4">
+        <button 
+            onClick={handleGenerateSummary}
+            className="px-4 py-2 border border-green-500 bg-green-500 text-white cursor-pointer text-lg rounded-md hover:bg-green-600"
+        >
+            {isGenerating ? 'Generating...' : 'Generate Summary'}
+        </button>
+    </div>
+)}
+
 
                 {summary && (
                     <div className="mt-4 p-3 border rounded bg-gray-50 text-gray-700">
