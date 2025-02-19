@@ -3,12 +3,12 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
+const path = require('path');
 
 if (process.env.NODE_ENV === 'development') {
   console.log('Using local environment variables');
   dotenv.config({ path: '.env.local' });
-}
-else {
+} else {
   dotenv.config();
 }
 
@@ -26,10 +26,12 @@ app.use(express.json());
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' });
 });
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Auth routes
 app.use('/api/auth', authRoutes);
-
+//upload routes
+app.use('/api', require('./routes/upload'));
 const PORT = process.env.PORT || 5600;
 
 app.listen(PORT, () => {
