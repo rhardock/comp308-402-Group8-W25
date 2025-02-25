@@ -4,7 +4,6 @@ import Link from 'next/link';
 
 import { useUser } from '@/context/UserContext';
 import Sidebar from '@/components/Sidebar';
-import TopBar from '@/components/TopBar';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
@@ -30,8 +29,6 @@ export default function DashboardLayout({ children }) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* TopBar */}
-        <TopBar userName={userName} />
 
         {/* Page Content */}
         <div className="flex-1 p-6 overflow-y-auto">
