@@ -46,4 +46,7 @@ debug.log
 
 # Build
 dist/
-build/ 
+build/
+
+# pdf files uploaded    
+uploads/

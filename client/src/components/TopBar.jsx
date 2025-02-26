@@ -12,10 +12,15 @@ const TopBar = () => {
   return (
     <div className="bg-white dark:bg-gray-800 p-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-      <h2 className="text-xl font-semibold  text-slate-800 dark:text-white">Noted!</h2>
-        {user && ( 
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Noted!</h2>
+        {user && (
           <>
             <p className="text-gray-700"></p>
+            <div className="flex items-center space-x-4">
+              <p className="text-gray-700 dark:text-gray-300 text-2xl text-left">
+                Welcome back, <span className="font-bold">{user.email}</span>!
+              </p>
+            </div>
             <button onClick={handleLogout}
                     className="ml-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
               Logout
