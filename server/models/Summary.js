@@ -11,11 +11,11 @@ const summarySchema = new mongoose.Schema({
   },
   extractedText: {
     type: String,
-    required: true
+    required: false
   },
   summary: {
     type: String,
-    required: true
+    required: false
   },
 /**  userId: {
     type: mongoose.Schema.Types.ObjectId,

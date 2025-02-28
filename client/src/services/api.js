@@ -38,6 +38,7 @@ export const uploadPdf = async (file) => {
       return { success: false, error: error.message };
   }
 };
+/*
 export const generateSummary = async (text) => {
   try {
       const response = await axios.post(`${API_URL}/generate-summary`, { text });
@@ -50,17 +51,7 @@ export const generateSummary = async (text) => {
       return { success: false, error: error.message };
   }
 };
-export const fetchSummaries = async () => {
-  try {
-      const response = await axios.get(`${API_URL}/summaries`);
-      return {
-          success: response.data.success,
-          summaries: response.data.summaries,
-      };
-  } catch (error) {
-      return { success: false, error: error.message };
-  }
-};
+
 // 🔹 Fetch Extracted Text by Summary ID
 export const fetchExtractedText = async (summaryId) => {
   try {
@@ -68,6 +59,17 @@ export const fetchExtractedText = async (summaryId) => {
       return {
           success: response.data.success,
           extractedText: response.data.extractedText,
+      };
+  } catch (error) {
+      return { success: false, error: error.message };
+  }
+};*/
+export const fetchSummaries = async () => {
+  try {
+      const response = await axios.get(`${API_URL}/summaries`);
+      return {
+          success: response.data.success,
+          summaries: response.data.summaries,
       };
   } catch (error) {
       return { success: false, error: error.message };
