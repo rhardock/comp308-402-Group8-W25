@@ -2,7 +2,7 @@ from transformers import pipeline
 import re
 
 class TextSummarizer:
-    def __init__(self, model_name='facebook/bart-large-cnn', min_ratio=0.5, max_ratio=0.8, chunk_size=800):
+    def __init__(self, model_name='facebook/bart-large-cnn', min_ratio=0.5, max_ratio=0.8, chunk_size=600):
         self.summarizer = pipeline("summarization", model=model_name, framework='pt')
         self.min_ratio = min_ratio
         self.max_ratio = max_ratio
@@ -39,13 +39,21 @@ class TextSummarizer:
         maximum = min(800, int(self.max_ratio * num_words))
 
         print('\nsummarizing:\n', chunk)
-        summary = self.summarizer(chunk,
-                                  max_length=maximum, min_length=minimum,
-                                  truncation=True)[0]['summary_text']
-        return summary  
+        try:
+
+            summary = self.summarizer(chunk,
+                                    max_length=maximum, min_length=minimum,
+                                    truncation=True)
+            if not summary:
+                print("Error: no summary returned from chunk.")
+                return "Summary Unavailable."
+            return summary[0]["summary_text"]
+        except:
+            return "Summary Error"  
 
 
     def summarize_text(self, text):
+        #print("Input text: ", text)
         if len(text.split()) < self.chunk_size:
             return self.__summarize_chunk(text)
         print('\nsplitting text\n')
