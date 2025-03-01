@@ -32,7 +32,7 @@ export const uploadPdf = async (file) => {
     const formData = new FormData();
     formData.append('pdf', file);
 
-    const response = await axios.post(`${API_URL}/upload`, formData, {
+    const response = await axios.post(`${API_URL}/summary/upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data',
                  'Authorization': `Bearer ${token}`       // Send JWT token in header
                },
@@ -42,14 +42,15 @@ export const uploadPdf = async (file) => {
       success: response.data.success,
       filePath: response.data.filePath, // Path to stored PDF
       extractedText: response.data.extractedText,
+      summaryId: response.data.summaryId,
     };
   } catch (error) {
     return { success: false, error: error.message };
   }
 };
 
-/*
-export const generateSummary = async (text) => {
+
+export const generatedSummary = async (text) => {
   try {
       const response = await axios.post(`${API_URL}/generate-summary`, { text });
 
@@ -73,7 +74,7 @@ export const fetchExtractedText = async (summaryId) => {
   } catch (error) {
       return { success: false, error: error.message };
   }
-};*/
+};
 
 export const fetchSummaries = async () => {
   console.log('fetchSummaries');
@@ -84,7 +85,7 @@ export const fetchSummaries = async () => {
       return { success: false, error: 'User not authenticated' };
     }
 
-    const response = await axios.get(`${API_URL}/summaries`, {
+    const response = await axios.get(`${API_URL}/summary/summaries`, {
       headers: {
         'Authorization': `Bearer ${token}`,  // Send JWT token in header
       },
@@ -94,6 +95,41 @@ export const fetchSummaries = async () => {
       summaries: response.data.summaries,
     };
   } catch (error) {
+    return { success: false, error: error.message };
+  }
+};
+export const updateSummary = async (summaryId, summary) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    console.log("🔍 Updating summary in MongoDB", { summaryId, summary });
+
+    const response = await axios.post(`${API_URL}/summary/update-summary`, 
+      { summaryId, summary }, // ✅ Ensure summary is sent correctly
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.success) {
+      console.log('✅ Summary updated in MongoDB:', response.data.summary);
+    } else {
+      console.error('🚨 Error updating summary in MongoDB:', response.data.error);
+    }
+
+    return {
+      success: response.data.success,
+      summary: response.data.summary
+    };
+  } catch (error) {
+    console.error('🚨 Error in updateSummary:', error.message);
     return { success: false, error: error.message };
   }
 };
