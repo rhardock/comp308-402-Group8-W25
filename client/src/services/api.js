@@ -76,13 +76,24 @@ export const fetchExtractedText = async (summaryId) => {
 };*/
 
 export const fetchSummaries = async () => {
+  console.log('fetchSummaries');
   try {
-      const response = await axios.get(`${API_URL}/summaries`);
-      return {
-          success: response.data.success,
-          summaries: response.data.summaries,
-      };
+    const token = localStorage.getItem('token'); // Get JWT token from local storage
+
+    if (!token) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const response = await axios.get(`${API_URL}/summaries`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,  // Send JWT token in header
+      },
+    });
+    return {
+      success: response.data.success,
+      summaries: response.data.summaries,
+    };
   } catch (error) {
-      return { success: false, error: error.message };
+    return { success: false, error: error.message };
   }
 };

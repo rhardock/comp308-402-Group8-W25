@@ -75,15 +75,16 @@ router.post('/upload', authenticateToken, upload.single('pdf'), async (req, res)
 // Get all summaries from MongoDB
 router.get('/summaries', authenticateToken, async (req, res) => {
   if (!req.user) {
+    console.log('User not authenticated');
     return res.status(401).json({ message: 'User not authenticated' });
   }
   
   try {
     const summaries = await Summary.find({ userId: req.user._id }
                                         ).sort({ createdAt: -1 }); // Sort by latest
+
     res.json({ success: true, summaries });
   } catch (error) {
-    console.log('Error fetching summaries:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });

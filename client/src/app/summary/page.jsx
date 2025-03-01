@@ -19,9 +19,9 @@ export default function PdfUploader() {
 
 
   // File size constraints (in MB)
-const MIN_FILE_SIZE = 0.01; // 10KB
-const MAX_FILE_SIZE = 100; // 10MB
-const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
+  const MIN_FILE_SIZE = 0.01; // 10KB
+  const MAX_FILE_SIZE = 100; // 10MB
+  const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
 
   const handleFileChange = useCallback((e) => {
     const selectedFile = e.target.files?.[0];
@@ -78,7 +78,7 @@ const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
         setStatus({ message: '✅ PDF processed successfully!', type: 'success' });
         setFileUrl(`http://localhost:5600${result.filePath}`);
         setSummaryId(result.summaryId);
-       
+        
       } else {
         setStatus({ message: result.error || 'Upload failed', type: 'error' });
         setFile(null); //  Reset file on failure
@@ -101,48 +101,48 @@ const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
     setStatus({ message: 'Generating summary...', type: 'loading' });
 
     try {
-        // Create form data to send the PDF file directly to Flask
+      // Create form data to send the PDF file directly to Flask
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('pages', "29-33")  //35-40 29-33
+      formData.append('pages', "1-4")  //35-40 29-33
       /**const summaryResult = await generateSummary(extractedText);
-      if (summaryResult.success) {
-        setSummary(summaryResult.summary);
+         if (summaryResult.success) {
+         setSummary(summaryResult.summary);
+         setStatus({ message: '✅ Summary generated successfully!', type: 'success' });
+         } else {
+         setStatus({ message: summaryResult.error || 'Summary generation failed', type: 'error' });
+         }
+         } catch (error) {
+         setStatus({ message: '⚠️ Error generating summary', type: 'error' });
+         } finally {
+         setIsGenerating(false);
+         }
+         };*/
+      // if (summaryId) {
+      //   formData.append('summaryId', summaryId);
+      // }
+
+      // Send the PDF directly to Flask
+      const response = await axios.post(FLASK_API_URL, formData);
+      console.log(response);
+      
+      if (response.status === 200) {
+        setSummary("");
+        setSummary(response.data.summary);
         setStatus({ message: '✅ Summary generated successfully!', type: 'success' });
       } else {
-        setStatus({ message: summaryResult.error || 'Summary generation failed', type: 'error' });
+        setStatus({ message: response.data.error || 'Summary generation failed', type: 'error' });
       }
     } catch (error) {
-      setStatus({ message: '⚠️ Error generating summary', type: 'error' });
+      console.error('Summary generation error:', error);
+      setStatus({ 
+        message: `⚠️ ${error.response?.data?.error || 'Error generating summary'}`, 
+        type: 'error' 
+      });
     } finally {
       setIsGenerating(false);
     }
-  };*/
-  // if (summaryId) {
-  //   formData.append('summaryId', summaryId);
-  // }
-
-  // Send the PDF directly to Flask
-  const response = await axios.post(FLASK_API_URL, formData);
-  console.log(response);
-  
-  if (response.status === 200) {
-    setSummary("");
-    setSummary(response.data.summary);
-    setStatus({ message: '✅ Summary generated successfully!', type: 'success' });
-  } else {
-    setStatus({ message: response.data.error || 'Summary generation failed', type: 'error' });
-  }
-} catch (error) {
-  console.error('Summary generation error:', error);
-  setStatus({ 
-    message: `⚠️ ${error.response?.data?.error || 'Error generating summary'}`, 
-    type: 'error' 
-  });
-} finally {
-  setIsGenerating(false);
-}
-};
+  };
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
