@@ -20,24 +20,34 @@ export const authApi = {
     return response.data;
   },
 }; 
+
 export const uploadPdf = async (file) => {
   try {
-      const formData = new FormData();
-      formData.append('pdf', file);
+    const token = localStorage.getItem('token'); // Get JWT token from local storage
 
-      const response = await axios.post(`${API_URL}/upload`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    if (!token) {
+      return { success: false, error: 'User not authenticated' };
+    }
+    
+    const formData = new FormData();
+    formData.append('pdf', file);
 
-      return {
-          success: response.data.success,
-          filePath: response.data.filePath, // Path to stored PDF
-          extractedText: response.data.extractedText,
-      };
+    const response = await axios.post(`${API_URL}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data',
+                 'Authorization': `Bearer ${token}`       // Send JWT token in header
+               },
+    });
+
+    return {
+      success: response.data.success,
+      filePath: response.data.filePath, // Path to stored PDF
+      extractedText: response.data.extractedText,
+    };
   } catch (error) {
-      return { success: false, error: error.message };
+    return { success: false, error: error.message };
   }
 };
+
 /*
 export const generateSummary = async (text) => {
   try {
@@ -64,6 +74,7 @@ export const fetchExtractedText = async (summaryId) => {
       return { success: false, error: error.message };
   }
 };*/
+
 export const fetchSummaries = async () => {
   try {
       const response = await axios.get(`${API_URL}/summaries`);
