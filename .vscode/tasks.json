@@ -1,0 +1,77 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start Client",
+            "type": "shell",
+            "command": "cd client && npm run dev",
+            "problemMatcher": [],
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Start Server",
+            "type": "shell",
+            "command": "cd server && npm run ${input:serverCommand}",
+            "problemMatcher": [],
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Start Flask",
+            "type": "shell",
+            "command": "cd GenerationAPI && start_server.bat",
+            "problemMatcher": [],
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Start All",
+            "dependsOrder": "parallel",
+            "dependsOn": ["Start Client", "Start Server", "Start Flask"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Start All (Dev Mode)",
+            "dependsOrder": "parallel",
+            "dependsOn": ["Start Client", "Start Server (Dev)", "Start Flask"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Start Server (Dev)",
+            "type": "shell",
+            "command": "cd server && npm run dev",
+            "problemMatcher": [],
+            "presentation": {
+                "panel": "dedicated",
+                "reveal": "always"
+            }
+        }
+    ],
+    "inputs": [
+        {
+            "id": "serverCommand",
+            "type": "pickString",
+            "description": "Choose the server command to run",
+            "options": [
+                "local",
+                "dev"
+            ],
+            "default": "local"
+        }
+    ]
+}

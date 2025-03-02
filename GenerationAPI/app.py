@@ -20,7 +20,6 @@ def status():
 
 @app.route("/summarize", methods=["POST"])
 def summarize():
-    
     try:
         if "file" not in request.files:
             return jsonify({"error": "No file uploaded"}), 400
@@ -34,11 +33,28 @@ def summarize():
 
         summary = summarizer.summarize_text(extracted_text)
         
-
         return jsonify({"summary": summary}), 200
 
     except Exception as e:
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+     
+@app.route("/summarizeraw", methods=["POST"])
+def summarize_raw():
+    try:
+        data = request.json
+        if not data or "text" not in data:
+            return jsonify({"error": "Missing text field in request"}), 400
         
+        text = data.get("text", "").strip()
+        if not text:
+            return jsonify({"error": "Text can not be empty."}), 400
+        
+        summary = summarizer.summarize_text(text)
+        return jsonify({"summary": summary})
+    except Exception as e:
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+    
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3003, debug=True)

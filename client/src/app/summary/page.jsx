@@ -3,9 +3,8 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { uploadPdf, fetchSummaries } from '@/services/api';
+import { updateSummary,uploadPdf } from '@/services/api';
 import axios from 'axios';
-
 
 export default function PdfUploader() {
   const [file, setFile] = useState(null);
@@ -16,14 +15,15 @@ export default function PdfUploader() {
   const [isGenerating, setIsGenerating] = useState(false); 
   const [extractedText, setExtractedText] = useState(''); 
   const [summaryId, setSummaryId] = useState(null);
-
+  const [pageRange, setPageRange] = useState('1-5');
+  const [totalPages, setTotalPages] = useState(0);
 
   // File size constraints (in MB)
-const MIN_FILE_SIZE = 0.01; // 10KB
-const MAX_FILE_SIZE = 100; // 10MB
-const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
+  const MIN_FILE_SIZE = 0.01; // 10KB
+  const MAX_FILE_SIZE = 100; // 10MB
+  const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // Flask endpoint
 
-  const handleFileChange = useCallback((e) => {
+  const handleFileChange = useCallback(async (e) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
@@ -51,44 +51,41 @@ const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
       setFile(null);
       return;
     }
-
+   
     setFile(selectedFile);
     setFileUrl(URL.createObjectURL(selectedFile)); // Temporary local preview URL
-    setExtractedText(''); // Clear extracted text from previous uploads
-    setSummary(''); // Clear previous summary
-    setStatus(null);
     
+    setSummary(''); // Clear previous summary
+    setSummaryId(null); // Clear previous summaryId
+    setStatus({ message: 'PDF selected', type: 'success' });
+    try {
+        // Upload file immediately to get summaryId
+        const uploadResult = await uploadPdf(selectedFile);
+        
+        if (uploadResult.success) {
+          // Set the URL from the server path
+          setFileUrl(uploadResult.filePath);
+          
+          // Save the summaryId
+          setSummaryId(uploadResult.summaryId);
+          
+          console.log('File uploaded, summaryId:', uploadResult.summaryId);
+          setStatus({ message: 'PDF ready for summarization', type: 'success' });
+        } else {
+          setStatus({ message: 'Upload failed: ' + uploadResult.error, type: 'error' });
+        }
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        setStatus({ message: 'Upload failed: ' + error.message, type: 'error' });
+      }
   }, []);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!file) {
-      setStatus({ message: 'Please select a PDF file', type: 'error' });
+  const handleViewPdf = () => {
+    if (!fileUrl) {
+      alert('Please select a PDF first.');
       return;
     }
-
-    setIsUploading(true);
-    setStatus({ message: 'Uploading PDF...', type: 'loading' });
-
-    try {
-      const result = await uploadPdf(file);
-
-      if (result.success) {
-        setStatus({ message: '✅ PDF processed successfully!', type: 'success' });
-        setFileUrl(`http://localhost:5600${result.filePath}`);
-        setSummaryId(result.summaryId);
-       
-      } else {
-        setStatus({ message: result.error || 'Upload failed', type: 'error' });
-        setFile(null); //  Reset file on failure
-      }
-    } catch (error) {
-      setStatus({ message: '⚠️ An unexpected error occurred', type: 'error' });
-      setFile(null); // Reset file on failure
-    } finally {
-      setIsUploading(false);
-    }
+    window.open(fileUrl, '_blank'); // Open the selected PDF in a new tab
   };
 
   const handleGenerateSummary = async () => {
@@ -101,56 +98,58 @@ const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
     setStatus({ message: 'Generating summary...', type: 'loading' });
 
     try {
-        // Create form data to send the PDF file directly to Flask
+      // Create form data to send the PDF file directly to Flask
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('pages', "29-33")  //35-40 29-33
-      /**const summaryResult = await generateSummary(extractedText);
-      if (summaryResult.success) {
-        setSummary(summaryResult.summary);
+      formData.append('pages', pageRange || "1-5");
+
+      // Send the PDF directly to Flask
+      const response = await axios.post(FLASK_API_URL, formData);
+      console.log('FLASK API COMPLETE RESPONSE:', response);
+console.log('RESPONSE DATA STRUCTURE:', JSON.stringify(response.data, null, 2));
+      if (response.status === 200) {
+        const generatedSummary = response.data.summary;
+        setSummary(generatedSummary);
         setStatus({ message: '✅ Summary generated successfully!', type: 'success' });
+
+        if (summaryId) {
+            console.log('SENDING TO MONGODB - summaryId:', summaryId);
+console.log('SENDING TO MONGODB - summary text:', generatedSummary?.substring(0, 100) + '...');
+          try {
+            // Use the updateSummary function from the API service
+            const updateResult = await updateSummary(summaryId, generatedSummary);
+            console.log('UPDATE RESULT:', updateResult);
+            if (updateResult.success) {
+              console.log('Summary updated in MongoDB',updateResult.summary);
+            } else {
+              console.error('Error updating summary in MongoDB:', updateResult.error);
+            }
+          } catch (updateError) {
+            console.error('Failed to update summary in database:', updateError);
+          }
+        }
       } else {
-        setStatus({ message: summaryResult.error || 'Summary generation failed', type: 'error' });
+        setStatus({ message: response.data.error || 'Summary generation failed', type: 'error' });
       }
     } catch (error) {
-      setStatus({ message: '⚠️ Error generating summary', type: 'error' });
+      console.error('Summary generation error:', error);
+      setStatus({ 
+        message: `⚠️ ${error.response?.data?.error || 'Error generating summary'}`, 
+        type: 'error' 
+      });
     } finally {
       setIsGenerating(false);
     }
-  };*/
-  // if (summaryId) {
-  //   formData.append('summaryId', summaryId);
-  // }
-
-  // Send the PDF directly to Flask
-  const response = await axios.post(FLASK_API_URL, formData);
-  console.log(response);
-  
-  if (response.status === 200) {
-    setSummary("");
-    setSummary(response.data.summary);
-    setStatus({ message: '✅ Summary generated successfully!', type: 'success' });
-  } else {
-    setStatus({ message: response.data.error || 'Summary generation failed', type: 'error' });
-  }
-} catch (error) {
-  console.error('Summary generation error:', error);
-  setStatus({ 
-    message: `⚠️ ${error.response?.data?.error || 'Error generating summary'}`, 
-    type: 'error' 
-  });
-} finally {
-  setIsGenerating(false);
-}
-};
+  };
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-4">
+        {/* Select PDF */}
         <label className="block text-gray-700 font-medium">
-          Upload a PDF ({MIN_FILE_SIZE}MB - {MAX_FILE_SIZE}MB)
+          Select a PDF ({MIN_FILE_SIZE}MB - {MAX_FILE_SIZE}MB)
         </label>
-
+    
         <Input 
           type="file" 
           accept=".pdf"
@@ -158,15 +157,26 @@ const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
           className="w-full"
           disabled={isUploading}
         />
-
-        <Button 
-          type="submit" 
-          className="w-full flex items-center justify-center"
-          disabled={!file || isUploading}
-        >
-          {isUploading ? 'Uploading...' : 'Upload PDF'}
-        </Button>
-
+    
+        {/* Page Range Selection */}
+        {file && (
+          <div>
+            <label className="block text-gray-700 font-medium mt-4">
+              Select Page Range (Max 5 Pages):
+            </label>
+            <select 
+              className="w-full p-2 border rounded mt-2"
+              value={pageRange}
+              onChange={(e) => setPageRange(e.target.value)}
+            >
+              <option value="1-5">Pages 1-5</option>
+              <option value="6-10">Pages 6-10</option>
+              <option value="11-15">Pages 11-15</option>
+              <option value="16-20">Pages 16-20</option>
+            </select>
+          </div>
+        )}
+  
         {/* Status message */}
         {status && (
           <div className={`p-2 rounded text-center mt-2
@@ -176,33 +186,33 @@ const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
             {status.message}
           </div>
         )}
-
+  
         {/* PDF preview */}
         {fileUrl && (
           <div className="mt-4 text-center">
-            <h3 className="text-lg font-semibold">Uploaded PDF:</h3>
-            <button 
-              onClick={() => window.open(fileUrl, '_blank')}
-              className="px-4 py-2 mt-2 border border-blue-500 bg-blue-500 text-white cursor-pointer text-lg rounded-md hover:bg-blue-600"
+            <h3 className="text-lg font-semibold">PDF Selected:</h3>
+            <Button 
+              onClick={handleViewPdf}
+              className="px-4 py-2 mt-2 border border-blue-500 bg-blue-500 text-white text-lg rounded-md hover:bg-blue-600"
             >
               View PDF
-            </button>
+            </Button>
           </div>
         )}
-
+  
         {/* Generate summary button */}
         {file && (
           <div className="flex justify-center mt-4">
-            <button 
+            <Button 
               onClick={handleGenerateSummary}
-              className="px-4 py-2 border border-green-500 bg-green-500 text-white cursor-pointer text-lg rounded-md hover:bg-green-600"
+              className="px-4 py-2 border border-green-500 bg-green-500 text-white text-lg rounded-md hover:bg-green-600"
               disabled={isGenerating}
             >
               {isGenerating ? 'Generating...' : 'Generate Summary'}
-            </button>
+            </Button>
           </div>
         )}
-
+  
         {/* Summary display */}
         {summary && (
           <div className="mt-4 p-3 border rounded bg-gray-50 text-gray-700">
@@ -210,7 +220,7 @@ const FLASK_API_URL = 'http://127.0.0.1:3003/summarize'; // New Flask endpoint
             <p className="whitespace-pre-line">{summary}</p>
           </div>
         )}
-      </form>
+      </div>
     </div>
   );
 }
