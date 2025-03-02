@@ -1,44 +1,55 @@
 'use client'; // Mark this as a Client Component
-import { useUser } from '@/context/UserContext';
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 
 const TopBar = () => {
-  const { user, logoutUser } = useUser();
-
-  const handleLogout = () => {
-    logoutUser();
-  };
+  const { user, logout } = useAuth();
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 shadow-md">
-      <div className="container mx-auto flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Noted!</h2>
-        {user && (
-          <>
-            <p className="text-gray-700"></p>
-            <div className="flex items-center space-x-4">
-              <p className="text-gray-700 dark:text-gray-300 text-2xl text-left">
-                Welcome back, <span className="font-bold">{user.email}</span>!
-              </p>
-            </div>
-            <button onClick={handleLogout}
-                    className="ml-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-              Logout
-            </button>
-          </>
-        )}
-        {!user && (
-          <div>
-            <Link href="/login">
-              <button className='bg-gray-900 dark:bg-gray-600 py-2 px-4 text-white rounded-lg mr-3 shadow-xl'>Log In</button>
-            </Link>
-            <Link href="/register">
-              <button className='bg-gray-900 dark:bg-gray-600 py-2 px-4 text-white rounded-lg shadow-xl'>Register</button>
+    <nav className="bg-white dark:bg-gray-800 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <Link 
+              href="/" 
+              className="flex items-center px-2 py-2 text-gray-900 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              Noted!
             </Link>
           </div>
-        )}
+          <div className="flex items-center">
+            {user ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-gray-700 dark:text-gray-300">
+                  {user.email}
+                </span>
+                <button
+                  onClick={logout}
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/login"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-100"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </nav>
   );
 };
 

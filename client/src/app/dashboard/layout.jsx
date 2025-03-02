@@ -1,40 +1,35 @@
 'use client'; // Mark this as a Client Component
 
 import Link from 'next/link';
-
-import { useUser } from '@/context/UserContext';
+import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/Sidebar';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export default function DashboardLayout({ children }) {
-  const { user } = useUser();  // Get user from context
+  const { user, loading } = useAuth();
   const router = useRouter();
 
-  // Fetch the user's name (replace with your logic)
-  const userName = 'John Doe'; // Example: Replace with session or context data
-
   useEffect(() => {
-    if (!user) {
-      router.replace('/login'); // Redirect to login if no user
+    if (!loading && !user) {
+      router.push('/login');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
-  if (!user) return null; // Don't render anything if no user
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
       <Sidebar />
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-
-        {/* Page Content */}
-        <div className="flex-1 p-6 overflow-y-auto">
-          {children}
-        </div>
-      </div>
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
