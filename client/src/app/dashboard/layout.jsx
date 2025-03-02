@@ -108,7 +108,10 @@ export default function DashboardLayout({ children }) {
           </div>
 
           {/* User Profile Section */}
-          <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} p-2 hover:bg-rose-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer`}>
+          <Link 
+            href="/dashboard/account"
+            className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} p-2 hover:bg-rose-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer`}
+          >
             <div className="flex items-center min-w-0">
               <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                 <FiUser className="w-5 h-5 text-gray-600" />
@@ -121,14 +124,17 @@ export default function DashboardLayout({ children }) {
             </div>
             {!isSidebarCollapsed && (
               <button 
-                onClick={logout}
+                onClick={(e) => {
+                  e.preventDefault();
+                  logout();
+                }}
                 className="ml-2 text-gray-500 hover:text-gray-700"
                 title="Sign out"
               >
                 <FiLogOut className="w-5 h-5" />
               </button>
             )}
-          </div>
+          </Link>
         </div>
 
         {/* Collapse Button - Centered vertically */}
