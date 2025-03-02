@@ -3,12 +3,9 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx}",
   ],
+  darkMode: 'class',
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ['var(--font-inter)'],
-      },
-    },
+    extend: {},
   },
   plugins: [],
 }; 

@@ -1,24 +1,27 @@
-import { Inter } from "next/font/google";
+'use client';
+
 import "./globals.css";
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import Providers from './Providers';
 import TopBar from "@/components/TopBar";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+import { usePathname } from 'next/navigation';
 
 export default function RootLayout({ children }) {
+  const pathname = usePathname();
+  const isDashboard = pathname?.startsWith('/dashboard');
+
   return (
-    <html lang="en" className={`${inter.variable} antialiased`}>
-      <body className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-        <AuthProvider>
-          <Providers>
-            <TopBar />
-            {children}
-          </Providers>
-        </AuthProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <ThemeProvider>
+          <AuthProvider>
+            {!isDashboard && <TopBar />}
+            <Providers>
+              {children}
+            </Providers>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
