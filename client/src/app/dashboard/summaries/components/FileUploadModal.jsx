@@ -15,7 +15,8 @@ export default function FileUploadModal({ isOpen, onClose }) {
   const [isUploading, setIsUploading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [summaryId, setSummaryId] = useState(null);
-  const [pageRange, setPageRange] = useState('1-5');
+  const [startPage, setStartPage] = useState(1);
+  const [endPage, setEndPage] = useState(5);
 
   // File size constraints
   const MIN_FILE_SIZE = 0.01;
@@ -55,6 +56,18 @@ export default function FileUploadModal({ isOpen, onClose }) {
     setIsGenerating(true);
     setStatus(null);
 
+    if (startPage > endPage || endPage - startPage > 5) {
+      setStatus({ message: 'Invalid page range. Please try again.', type: 'error' });
+      setIsGenerating(false);
+      return;
+    }
+    let pageRange = "";
+    if(startPage == endPage){
+      pageRange = `${startPage}`;
+    }
+    else{
+      pageRange = `${startPage}-${endPage}`;
+    }
     try {
       // First, upload the PDF
 
@@ -144,16 +157,10 @@ export default function FileUploadModal({ isOpen, onClose }) {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Select Page Range (Max 5 Pages):
               </label>
-              <select 
-                className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
-                value={pageRange}
-                onChange={(e) => setPageRange(e.target.value)}
-              >
-                <option value="1-5">Pages 1-5</option>
-                <option value="6-10">Pages 6-10</option>
-                <option value="11-15">Pages 11-15</option>
-                <option value="16-20">Pages 16-20</option>
-              </select>
+              <div className='flex gap-4 justify-center'>
+                <input type='number' placeholder='start' onChange={(e) => setStartPage(e.target.value)} className="w-1/3 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"/>
+                <input type='number' placeholder='end' onChange={(e) => setEndPage(e.target.value)} className="w-1/3 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"/>
+              </div>
             </div>
           )}
         </div>
