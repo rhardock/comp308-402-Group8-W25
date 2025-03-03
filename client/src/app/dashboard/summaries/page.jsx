@@ -16,6 +16,10 @@ export default function Summaries() {
   const [isMethodModalOpen, setIsMethodModalOpen] = useState(false);
   const [isFileModalOpen, setIsFileModalOpen] = useState(false);
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
+  const [selectedSummary, setSelectedSummary] = useState(null);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [sortField, setSortField] = useState('createdAt');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
     loadSummaries();
@@ -32,6 +36,43 @@ export default function Summaries() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedSummaries = [...summaries].sort((a, b) => {
+    if (sortField === 'createdAt') {
+      return sortDirection === 'asc' 
+        ? new Date(a.createdAt) - new Date(b.createdAt)
+        : new Date(b.createdAt) - new Date(a.createdAt);
+    }
+    const valueA = a[sortField]?.toLowerCase() || '';
+    const valueB = b[sortField]?.toLowerCase() || '';
+    return sortDirection === 'asc' 
+      ? valueA.localeCompare(valueB)
+      : valueB.localeCompare(valueA);
+  });
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const viewSummary = (summary) => {
+    setSelectedSummary(summary);
+    setShowSummaryModal(true);
   };
 
   return (
@@ -55,11 +96,79 @@ export default function Summaries() {
           </div>
         </div>
 
+        {/* Summaries Table */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
+          </div>
+        ) : summaries.length > 0 ? (
+          <div className="overflow-x-auto shadow-md rounded-lg">
+            <table className="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-700">
+                  <th 
+                    className="px-4 py-3 border-b border-gray-200 dark:border-gray-600 text-left font-medium text-gray-700 dark:text-gray-200 cursor-pointer"
+                    onClick={() => handleSort('originalFileName')}
+                  >
+                    File Name
+                    {sortField === 'originalFileName' && (
+                      <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </th>
+                  <th className="px-4 py-3 border-b border-gray-200 dark:border-gray-600 text-left font-medium text-gray-700 dark:text-gray-200">
+                    Summary Preview
+                  </th>
+                  <th 
+                    className="px-4 py-3 border-b border-gray-200 dark:border-gray-600 text-left font-medium text-gray-700 dark:text-gray-200 cursor-pointer"
+                    onClick={() => handleSort('createdAt')}
+                  >
+                    Created At
+                    {sortField === 'createdAt' && (
+                      <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
+                    )}
+                  </th>
+                  <th className="px-4 py-3 border-b border-gray-200 dark:border-gray-600 text-left font-medium text-gray-700 dark:text-gray-200">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedSummaries.map((summary) => (
+                  <tr key={summary._id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                      {summary.originalFileName}
+                    </td>
+                    <td className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                      {summary.summary && summary.summary.length > 100
+                        ? `${summary.summary.slice(0, 100)}...`
+                        : summary.summary || 'No Summary'}
+                    </td>
+                    <td className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                      {formatDate(summary.createdAt)}
+                    </td>
+                    <td className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                      <button 
+                        onClick={() => viewSummary(summary)}
+                        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <p className="text-gray-500 dark:text-gray-400">
+              No summaries yet. Create your first one!
+            </p>
+          </div>
+        )}
+
         {/* Method Selection Modal */}
-        <Modal 
-          isOpen={isMethodModalOpen} 
-          onClose={() => setIsMethodModalOpen(false)}
-        >
+        <Modal isOpen={isMethodModalOpen} onClose={() => setIsMethodModalOpen(false)}>
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Choose Summary Method
@@ -113,38 +222,29 @@ export default function Summaries() {
           onClose={() => setIsTextModalOpen(false)}
         />
 
-        {/* Summaries Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loading ? (
-            <div>Loading summaries...</div>
-          ) : summaries.length > 0 ? (
-            summaries.map((summary) => (
-              <div 
-                key={summary._id}
-                className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  {summary.title || 'Untitled Summary'}
+        {/* Summary View Modal */}
+        <Modal isOpen={showSummaryModal} onClose={() => setShowSummaryModal(false)}>
+          {selectedSummary && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {selectedSummary.originalFileName}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  {new Date(summary.createdAt).toLocaleDateString()}
-                </p>
-                <div className="flex justify-end">
-                  <button 
-                    onClick={() => router.push(`/dashboard/summaries/${summary._id}`)}
-                    className="text-blue-600 hover:text-blue-700 dark:text-blue-400 text-sm font-medium"
-                  >
-                    View Summary →
-                  </button>
-                </div>
               </div>
-            ))
-          ) : (
-            <div className="text-gray-500 dark:text-gray-400">
-              No summaries yet. Create your first one!
+              
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Created: {formatDate(selectedSummary.createdAt)}
+              </div>
+
+              <div className="border rounded p-4 bg-gray-50 dark:bg-gray-700">
+                <h4 className="font-medium mb-2 text-gray-900 dark:text-white">Summary:</h4>
+                <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">
+                  {selectedSummary.summary || 'No summary content available.'}
+                </p>
+              </div>
             </div>
           )}
-        </div>
+        </Modal>
       </div>
     </ProtectedRoute>
   );
