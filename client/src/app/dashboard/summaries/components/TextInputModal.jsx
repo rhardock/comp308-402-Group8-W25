@@ -12,6 +12,8 @@ export default function TextInputModal({ isOpen, onClose }) {
 
   const handleSubmit = async () => {
     // Handle text submission logic here
+    alert("Sorry: Text input is not yet supported");
+    
     console.log('Submitting text:', text);
   };
 

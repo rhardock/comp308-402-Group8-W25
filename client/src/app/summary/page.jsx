@@ -106,15 +106,15 @@ export default function PdfUploader() {
       // Send the PDF directly to Flask
       const response = await axios.post(FLASK_API_URL, formData);
       console.log('FLASK API COMPLETE RESPONSE:', response);
-console.log('RESPONSE DATA STRUCTURE:', JSON.stringify(response.data, null, 2));
+      console.log('RESPONSE DATA STRUCTURE:', JSON.stringify(response.data, null, 2));
       if (response.status === 200) {
         const generatedSummary = response.data.summary;
         setSummary(generatedSummary);
         setStatus({ message: '✅ Summary generated successfully!', type: 'success' });
 
         if (summaryId) {
-            console.log('SENDING TO MONGODB - summaryId:', summaryId);
-console.log('SENDING TO MONGODB - summary text:', generatedSummary?.substring(0, 100) + '...');
+          console.log('SENDING TO MONGODB - summaryId:', summaryId);
+          console.log('SENDING TO MONGODB - summary text:', generatedSummary?.substring(0, 100) + '...');
           try {
             // Use the updateSummary function from the API service
             const updateResult = await updateSummary(summaryId, generatedSummary);

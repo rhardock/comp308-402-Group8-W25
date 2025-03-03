@@ -57,26 +57,41 @@ export default function FileUploadModal({ isOpen, onClose }) {
 
     try {
       // First, upload the PDF
+
+      /*
       const formData = new FormData();
       formData.append('pdf', file);
+      */
 
-      const uploadResponse = await uploadPdf(formData);
+      const uploadResponse = await uploadPdf(file);
       if (!uploadResponse.success) {
         throw new Error('Failed to upload PDF');
       }
 
       // Then, send to Flask API for processing
-      const flaskResponse = await axios.post(FLASK_API_URL, {
-        file_url: uploadResponse.url,
-        page_range: pageRange
-      });
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('pages', pageRange || "1-5");
 
-      if (flaskResponse.data.success) {
+      const flaskResponse = await axios.post(FLASK_API_URL, formData);
+
+      /*
+      const flaskResponse = await axios.post(FLASK_API_URL, {
+        file: file,
+        pages: pageRange
+      });
+      */
+      
+      if (flaskResponse.status === 200) {
+
         // Update the summary in your database
+        /*
         const updateResponse = await updateSummary({
           summaryId: uploadResponse.summaryId,
           summary: flaskResponse.data.summary
-        });
+          });
+        */
+        const updateResponse = await updateSummary(uploadResponse.summaryId, flaskResponse.data.summary);
 
         if (updateResponse.success) {
           setSummary(flaskResponse.data.summary);
@@ -170,7 +185,16 @@ export default function FileUploadModal({ isOpen, onClose }) {
         </div>
 
         {/* Summary Display */}
-        {summary && (
+        {summaryId && !summary && !isGenerating ? (
+          <div className="mt-6 p-6 border rounded-lg bg-gray-50 dark:bg-gray-700/50">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              No Summary Created
+            </h3>
+            <p className="whitespace-pre-line text-gray-700 dark:text-gray-300">
+              Check if page range of document has been exceeded.
+            </p>
+          </div>
+        ) : summary ? (
           <div className="mt-6 p-6 border rounded-lg bg-gray-50 dark:bg-gray-700/50">
             <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
               Generated Summary
@@ -179,7 +203,8 @@ export default function FileUploadModal({ isOpen, onClose }) {
               {summary}
             </p>
           </div>
-        )}
+        ) : null}
+        
       </div>
     </Modal>
   );
