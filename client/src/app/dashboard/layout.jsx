@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { RiDashboardLine } from 'react-icons/ri';
 import { BiBookAlt } from 'react-icons/bi';
 import { BsCardText } from 'react-icons/bs';
-import { FiSun, FiMoon, FiGlobe, FiMonitor, FiUser, FiLogOut, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiSun, FiMoon, FiUser, FiLogOut, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 export default function DashboardLayout({ children }) {
   const { user, loading, logout } = useAuth();
@@ -42,6 +42,12 @@ export default function DashboardLayout({ children }) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to sign out?')) {
+      logout();
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (!user) return null;
@@ -80,9 +86,10 @@ export default function DashboardLayout({ children }) {
           </nav>
         </div>
 
-        {/* Bottom Section with Theme, Language, etc */}
+        {/* Bottom Section - Simplified */}
         <div className="mt-auto p-4">
-          <div className={`flex ${isSidebarCollapsed ? 'flex-col space-y-4' : 'justify-around'} mb-4`}>
+          {/* Theme Toggle */}
+          <div className="mb-4 flex justify-center">
             <button 
               onClick={toggleTheme}
               className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-rose-100 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
@@ -93,26 +100,14 @@ export default function DashboardLayout({ children }) {
                 <FiSun className="w-5 h-5" />
               }
             </button>
-            <button 
-              className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-rose-100 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              title="Language"
-            >
-              <FiGlobe className="w-5 h-5" />
-            </button>
-            <button 
-              className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-rose-100 dark:hover:bg-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              title="Display"
-            >
-              <FiMonitor className="w-5 h-5" />
-            </button>
           </div>
 
           {/* User Profile Section */}
-          <Link 
-            href="/dashboard/account"
-            className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} p-2 hover:bg-rose-100 dark:hover:bg-gray-700 rounded-lg cursor-pointer`}
-          >
-            <div className="flex items-center min-w-0">
+          <div className={`flex items-center ${isSidebarCollapsed ? 'justify-center' : 'justify-between'} p-2 hover:bg-rose-100 dark:hover:bg-gray-700 rounded-lg`}>
+            <Link 
+              href="/dashboard/account"
+              className="flex items-center min-w-0"
+            >
               <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                 <FiUser className="w-5 h-5 text-gray-600" />
               </div>
@@ -121,20 +116,17 @@ export default function DashboardLayout({ children }) {
                   {user.email.split('@')[0]}
                 </span>
               )}
-            </div>
+            </Link>
             {!isSidebarCollapsed && (
               <button 
-                onClick={(e) => {
-                  e.preventDefault();
-                  logout();
-                }}
-                className="ml-2 text-gray-500 hover:text-gray-700"
+                onClick={handleLogout}
+                className="ml-2 p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
                 title="Sign out"
               >
                 <FiLogOut className="w-5 h-5" />
               </button>
             )}
-          </Link>
+          </div>
         </div>
 
         {/* Collapse Button - Centered vertically */}
