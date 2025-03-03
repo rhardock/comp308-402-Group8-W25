@@ -69,41 +69,23 @@ export default function FileUploadModal({ isOpen, onClose }) {
       pageRange = `${startPage}-${endPage}`;
     }
     try {
-      // First, upload the PDF
-
-      /*
-      const formData = new FormData();
-      formData.append('pdf', file);
-      */
-
-      const uploadResponse = await uploadPdf(file);
-      if (!uploadResponse.success) {
-        throw new Error('Failed to upload PDF');
-      }
-
-      // Then, send to Flask API for processing
+      // send to Flask API for processing
       const formData = new FormData();
       formData.append('file', file);
       formData.append('pages', pageRange || "1-5");
 
       const flaskResponse = await axios.post(FLASK_API_URL, formData);
-
-      /*
-      const flaskResponse = await axios.post(FLASK_API_URL, {
-        file: file,
-        pages: pageRange
-      });
-      */
+      if (!flaskResponse.data.summary){
+        setStatus({message: 'Failed to generate summary', type: 'error'});
+        console.log("Flask response is empty.");
+        return;
+      }
       
       if (flaskResponse.status === 200) {
-
-        // Update the summary in your database
-        /*
-        const updateResponse = await updateSummary({
-          summaryId: uploadResponse.summaryId,
-          summary: flaskResponse.data.summary
-          });
-        */
+        const uploadResponse = await uploadPdf(file);
+        if (!uploadResponse.success) {
+          throw new Error('Failed to upload PDF');
+        }
         const updateResponse = await updateSummary(uploadResponse.summaryId, flaskResponse.data.summary);
 
         if (updateResponse.success) {

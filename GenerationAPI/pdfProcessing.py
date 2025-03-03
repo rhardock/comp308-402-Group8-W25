@@ -32,10 +32,11 @@ def clean_page(page):
     height = page.rect.height
 
     header_region = (0, 0, width, height * 0.1)
-    footer_region = (0, height * 0.9, width, height)
+    footer_region = (0, height * 0.95, width, height)
 
     header_text = page.get_text("text", clip=header_region)
     footer_text = page.get_text("text", clip=footer_region)
-
+    print(f"footer: {footer_text}")
+    print(f"header: {header_text}")
     cleaned_text = page.get_text().replace(header_text, "").replace(footer_text, "")
     return cleaned_text
