@@ -75,6 +75,18 @@ export default function Summaries() {
     setShowSummaryModal(true);
   };
 
+  // Function to refresh the summaries list
+  const refreshSummaries = async () => {
+    setLoading(true);
+    const result = await fetchSummaries();
+    if (result.success) {
+      setSummaries(result.summaries);
+    } else {
+      setError(result.error);
+    }
+    setLoading(false);
+  };  
+
   return (
     <ProtectedRoute>
       <div className="space-y-6">
@@ -213,13 +225,19 @@ export default function Summaries() {
         {/* File Upload Modal */}
         <FileUploadModal 
           isOpen={isFileModalOpen}
-          onClose={() => setIsFileModalOpen(false)}
+          onClose={() => {
+            setIsFileModalOpen(false);
+            refreshSummaries();
+          }}
         />
 
         {/* Text Input Modal */}
         <TextInputModal 
           isOpen={isTextModalOpen}
-          onClose={() => setIsTextModalOpen(false)}
+          onClose={() => {
+            setIsTextModalOpen(false);
+            refreshSummaries();
+          }}
         />
 
         {/* Summary View Modal */}
