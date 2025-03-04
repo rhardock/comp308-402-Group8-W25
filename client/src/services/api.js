@@ -58,6 +58,34 @@ export const uploadPdf = async (file) => {
   }
 };
 
+export const uploadRawTextSummary = async (title, text, summaryText) => {
+  try {
+    const token = localStorage.getItem('token'); // Get JWT token from local storage
+
+    if (!token) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
+    const response = await axios.post(`${API_URL}/summary/upload-raw`,
+      { title, text, summaryText }, 
+      {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,  // Send JWT token in header
+      },
+    });
+
+    return {
+      success: response.data.success,
+      extractedText: response.data.extractedText,
+      summary: response.data.summary,
+      summaryId: response.data.summaryId,
+    };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+}
+
 
 export const generatedSummary = async (text) => {
   try {

@@ -111,7 +111,7 @@ export default function Summaries() {
                     className="px-4 py-3 border-b border-gray-200 dark:border-gray-600 text-left font-medium text-gray-700 dark:text-gray-200 cursor-pointer"
                     onClick={() => handleSort('originalFileName')}
                   >
-                    File Name
+                    Name
                     {sortField === 'originalFileName' && (
                       <span className="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
                     )}

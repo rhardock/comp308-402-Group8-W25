@@ -53,6 +53,36 @@ router.post('/upload', authenticateToken, upload.single('pdf'), async (req, res)
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
+router.post('/upload-raw', authenticateToken, async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'User not authenticated' });
+  }
+  try{
+    const { title, text, summaryText } = req.body;
+    const summary = new Summary({
+      originalFileName: title,
+      storedFilePath: "NA",
+      extractedText: text,
+      summary: summaryText,
+      userId: req.user._id
+    });
+
+    await summary.save();
+
+    res.json({
+      success: true,
+      extractedText: summary.extractedText,
+      summary: summary.summary,
+      summaryId: summary._id
+    });
+  }catch (error) {
+    console.error('Error uploading file:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+
+});
+
 router.get('/get-pdfs', async (req, res) => {
     try {
       const summaryDir = path.join(__dirname, '../summary');
