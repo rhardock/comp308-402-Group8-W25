@@ -26,6 +26,7 @@ export default function Summaries() {
   }, []);
 
   const loadSummaries = async () => {
+    setLoading(true);
     try {
       const response = await fetchSummaries();
       if (response.success) {
@@ -74,18 +75,6 @@ export default function Summaries() {
     setSelectedSummary(summary);
     setShowSummaryModal(true);
   };
-
-  // Function to refresh the summaries list
-  const refreshSummaries = async () => {
-    setLoading(true);
-    const result = await fetchSummaries();
-    if (result.success) {
-      setSummaries(result.summaries);
-    } else {
-      setError(result.error);
-    }
-    setLoading(false);
-  };  
 
   return (
     <ProtectedRoute>
@@ -152,8 +141,8 @@ export default function Summaries() {
                     </td>
                     <td className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
                       {summary.summary && summary.summary.length > 100
-                        ? `${summary.summary.slice(0, 100)}...`
-                        : summary.summary || 'No Summary'}
+                       ? `${summary.summary.slice(0, 100)}...`
+                       : summary.summary || 'No Summary'}
                     </td>
                     <td className="px-4 py-3 border-b border-gray-200 dark:border-gray-600">
                       {formatDate(summary.createdAt)}
@@ -227,7 +216,7 @@ export default function Summaries() {
           isOpen={isFileModalOpen}
           onClose={() => {
             setIsFileModalOpen(false);
-            refreshSummaries();
+            loadSummaries();
           }}
         />
 
@@ -236,7 +225,7 @@ export default function Summaries() {
           isOpen={isTextModalOpen}
           onClose={() => {
             setIsTextModalOpen(false);
-            refreshSummaries();
+            loadSummaries();
           }}
         />
 

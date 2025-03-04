@@ -140,8 +140,8 @@ export default function FileUploadModal({ isOpen, onClose }) {
                 Select Page Range (Max 5 Pages):
               </label>
               <div className='flex gap-4 justify-center'>
-                <input type='number' placeholder='start' onChange={(e) => setStartPage(e.target.value)} className="w-1/3 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"/>
-                <input type='number' placeholder='end' onChange={(e) => setEndPage(e.target.value)} className="w-1/3 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"/>
+                <input type='number' value={startPage} placeholder='start' onChange={(e) => setStartPage(Number(e.target.value))} className="w-1/3 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"/>
+                <input type='number' value={endPage} placeholder='end' onChange={(e) => setEndPage(Number(e.target.value))} className="w-1/3 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"/>
               </div>
             </div>
           )}
