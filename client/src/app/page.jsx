@@ -24,7 +24,7 @@ const LandingPage = () => {
   
   return (
     <div>
-      <div className='text-center bg-gradient-to-b from-white to-slate-300 dark:from-gray-900 dark:to-gray-700 flex justify-center mt-20 mb-32'>
+      <div className='text-center bg-gradient-to-b from-white to-rose-100 dark:from-gray-900 dark:to-gray-700 flex justify-center mt-20 mb-32'>
         <div className='text-center'>
           <h1 className='sm:text-[64px] text-4xl font-bold w-2/3 mx-auto sm:leading-[1.2]'>Revolutionize Your Study Sessions with AI</h1>
           <Link href="/register">
@@ -34,7 +34,7 @@ const LandingPage = () => {
         </div>  
       </div>
       <h1 className='text-center text-4xl font-bold pt-16'>Enhance Your Learning Experience</h1>
-      <div className='sm:w-3/5 w-5/6 mx-auto mt-8 flex justify-between gap-x-10 gap-y-10 flex-col sm:flex-row'>
+      <div className='sm:w-3/5 w-5/6 mx-auto mt-8 flex justify-between gap-x-10 gap-y-10 flex-col sm:flex-row mb-24'>
         <SummarizeCard />
         <FlashCardCard />
       </div>
