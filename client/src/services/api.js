@@ -182,7 +182,7 @@ export const deleteSummary = async (summaryId) => {
       return { success: false, error: 'User not authenticated' };
     }
 
-    const response = await axios.delete(`${API_URL}/summary/delete-summary/${summaryId}`, {
+    const response = await axios.delete(`${API_URL}/summary/${summaryId}`, {
       headers: {
         'Authorization': `Bearer ${token}`, // Send JWT token in header
       },

@@ -174,4 +174,31 @@ router.get('/summary/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// 5. NEW: Delete a specific summary
+router.delete('/:id', authenticateToken, async (req, res) => {
+  // console.log('DELETE request received for summary ID:', req.params.id);
+
+  if (!req.user) {
+    return res.status(401).json({ message: 'User not authenticated' });
+  }
+
+  try {
+    const summary = await Summary.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user._id
+    });
+
+    if (!summary) {
+      return res.status(404).json({
+        success: false,
+        error: 'Summary not found or you do not have permission to delete it'
+      });
+    }
+
+    res.json({ success: true, message: 'Summary deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 module.exports = router;
