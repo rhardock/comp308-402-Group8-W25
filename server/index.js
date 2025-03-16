@@ -27,7 +27,6 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // middleware setup:
-app.use('/api/summary', summaryRoutes);
 if (process.env.NODE_ENV === 'development') {
   console.log('Using local environment variables');
   dotenv.config({ path: '.env.local' });
