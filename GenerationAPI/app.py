@@ -49,7 +49,7 @@ def summarize():
     except Exception as e:
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-     
+#summarize raw input text
 @app.route("/summarizeraw", methods=["POST"])
 def summarize_raw():
     try:
@@ -68,9 +68,9 @@ def summarize_raw():
     except Exception as e:
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
-
+#generate questions and answers from raw text
 @app.route("/generate-qa-raw", methods=["POST"])
-def generate_qa():
+def generate_qa_raw():
     try:
         data = request.json
         #error if no text in request
@@ -87,6 +87,31 @@ def generate_qa():
     except Exception as e:
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
+#generate questions and answers from pdf
+@app.route("/generate-qa", methods=["POST"])
+def generate_qa():
+    try:
+        #error if no file is uploaded
+        if "file" not in request.files:
+            return jsonify({"error": "No file uploaded"}), 400
+
+        file = request.files["file"]
+        #get pages from request, default to 1-5
+        pages = request.form.get("pages", "1-5")
+        #format the page numbers for easier use later  
+        page_numbers = parse_page_range(pages)
+        #open the pdf from the request
+        pdf_doc = fitz.open(stream=io.BytesIO(file.read()), filetype="pdf")
+        print(len(pdf_doc))
+        #extract text from supplied page numbers
+        extracted_text = extract_text_from_pdf(pdf_doc, page_numbers)
+        #generate questions from extracted text
+        questions = questionGenerator.generate(extracted_text)
+        
+        return jsonify({"response": questions}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 
 if __name__ == "__main__":
