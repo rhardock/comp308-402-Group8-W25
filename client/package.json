@@ -1,12 +1,24 @@
 {
-  "name": "noted",
+  "name": "noted-micro-frontends",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "micro-frontends/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "concurrently \"npm run dev:auth\" \"npm run dev:notes\" \"npm run dev:shared\"",
+    "dev:auth": "cd micro-frontends/auth && npm run dev",
+    "dev:notes": "cd micro-frontends/notes && npm run dev",
+    "dev:shared": "cd micro-frontends/shared-ui && npm run dev",
+    "build": "npm run build:shared && npm run build:auth && npm run build:notes",
+    "build:auth": "cd micro-frontends/auth && npm run build",
+    "build:notes": "cd micro-frontends/notes && npm run build",
+    "build:shared": "cd micro-frontends/shared-ui && npm run build",
+    "start": "concurrently \"npm run start:auth\" \"npm run start:notes\"",
+    "start:auth": "cd micro-frontends/auth && npm run start",
+    "start:notes": "cd micro-frontends/notes && npm run start",
+    "install:all": "npm install && npm run install:deps",
+    "install:deps": "concurrently \"cd micro-frontends/auth && npm install\" \"cd micro-frontends/notes && npm install\" \"cd micro-frontends/shared-ui && npm install\""
   },
   "dependencies": {
     "@react-pdf-viewer/core": "^3.12.0",
@@ -26,6 +38,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
     "postcss": "^8.4.31",
-    "tailwindcss": "^3.3.5"
+    "tailwindcss": "^3.3.5",
+    "concurrently": "^8.0.0"
   }
 }
