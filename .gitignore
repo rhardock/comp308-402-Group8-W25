@@ -1,2 +1,4 @@
 auth-service/.env
 server/.env
+auth-service/node_modules
+server/node_modules
