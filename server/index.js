@@ -8,7 +8,7 @@ if (process.env.NODE_ENV === 'development') {
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
-const authRoutes = require('./routes/authRoutes');
+// const authRoutes = require('./routes/authRoutes');
 const summaryRoutes = require('./routes/summary');
 const path = require('path');
 // Initialize express app
@@ -44,7 +44,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authRoutes);
+//app.use('/api/auth', authRoutes);
 app.use('/api/summary', summaryRoutes);
 
 // Error handling middleware

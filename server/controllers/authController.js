@@ -1,4 +1,6 @@
-const bcrypt = require('bcryptjs');
+//commented out old authentication logic just in case, delete if unnecessary
+
+/*const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
@@ -59,3 +61,4 @@ module.exports = {
   register,
   login
 }; 
+*/
