@@ -110,5 +110,5 @@ class Params(BaseModel):
 
 class Prompt(BaseModel):
     params: Params
-    user_prompt: str = USER_PROMPT_FORMAT
-    system_prompt: str
+    user_prompt: str | None = USER_PROMPT_FORMAT
+    system_prompt: str | None = None

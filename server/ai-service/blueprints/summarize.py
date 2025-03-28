@@ -17,8 +17,8 @@ import io
 
 summarize_bp = Blueprint("summarize", __name__, url_prefix="/api/v1", description="API endpoints for text summarization.")
 
+#region Helper Functions
 def parse_page_range(page_range):
-    """Parse page range string (e.g., '1-5,7,9-11') into a list of page numbers."""
     page_numbers = []
     parts = page_range.split(',')
     
@@ -31,16 +31,14 @@ def parse_page_range(page_range):
     
     return page_numbers
 
-
 def extract_text_from_pdf(pdf_doc, page_numbers):
-    """Extract text from specific pages of a PDF document."""
     text = ""
     for page_num in page_numbers:
         if 0 <= page_num - 1 < len(pdf_doc):  # PDF pages are 0-indexed
             page = pdf_doc[page_num - 1]
             text += page.get_text()
     return text
-
+#endregion
 
 @summarize_bp.route("/summarize-raw", methods=["POST"])
 def summarize_raw() -> tuple[Response, int]:

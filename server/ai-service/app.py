@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from config.rich_logging import logger as log
 from blueprints.general import general_bp
-from blueprints.summarize import summary_bp
+from blueprints.summarize import summarize_bp
 from blueprints.generate import generate_bp
 
 app = Flask(__name__)
@@ -32,7 +32,7 @@ def make_custom_response(**kwargs) -> Response:
 
 
 app.register_blueprint(general_bp)
-app.register_blueprint(summary_bp)
+app.register_blueprint(summarize_bp)
 app.register_blueprint(generate_bp)
 
 

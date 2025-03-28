@@ -1,4 +1,4 @@
-from transformers import pipeline
+
 import re
 
 class TextSummarizer:
@@ -25,7 +25,7 @@ class TextSummarizer:
             if end < num_words:
                 for i in range(end, start, -1):
                     if sentence_endings.match(words[i][-1]):  
-                        end = i + 1
+                        end = i +from transformers import pipeline 1
                         break
 
             chunk = " ".join(words[start:end]) 

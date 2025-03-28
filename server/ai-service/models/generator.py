@@ -29,7 +29,8 @@ class QuestionGenerator:
             stream=False
         )
         self.prompt = Prompt(
-            params=self.params
+            params=self.params,
+            system_prompt=None
         )
 
     def generate(self, text: str) -> str | None:

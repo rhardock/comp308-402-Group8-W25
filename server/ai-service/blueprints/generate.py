@@ -18,7 +18,7 @@ from lib.sanitizer import sanitize_text
 
 generate_bp = Blueprint("generate", __name__, url_prefix="/api/v1", description="API endpoints for generating questions and answers from text or PDF.")
 
-# Helper functions
+#region Helper Functions
 def parse_page_range(page_range):
     page_numbers = []
     parts = page_range.split(',')
@@ -39,6 +39,7 @@ def extract_text_from_pdf(pdf_doc, page_numbers):
             page = pdf_doc[page_num - 1]
             text += page.get_text()
     return text
+#endregion
 
 @generate_bp.route("/qa-raw", methods=["POST"])
 def generate_qa_raw() -> tuple[Response, int]:
